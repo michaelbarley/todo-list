@@ -3,21 +3,16 @@
     <h2 class="title" :style="dynamicColor">Todo List</h2>
 
     <div v-if="items.length > 0">
-      <to-do-list
-        :items="items"
-        :active-item="activeItem"
-        @select-item="selectItem"
-        @edit-item="editItem"
-        @remove-item="removeItem"
-        @save-item="saveItem"
-      ></to-do-list>
+      <to-do-list :items="items" :active-item="activeItem" @select-item="selectItem" @edit-item="editItem"
+        @remove-item="removeItem" @save-item="saveItem"></to-do-list>
     </div>
     <div v-else>
       <p>No items yet. Let's add some!</p>
     </div>
 
     <div class="add-form">
-      <input type="text" class="add-input" v-model="newItem" ref="newItemInput" placeholder="Add new item" @keyup.enter="addItem">
+      <input type="text" class="add-input" v-model="newItem" ref="newItemInput" placeholder="Add new item"
+        @keyup.enter="addItem">
       <button class="add-button" @click="addItem">
         <i>ADD</i>
       </button>
@@ -55,13 +50,19 @@ export default {
     ...mapActions("todos", ["removeItem", "selectItem", "editItem", "saveItem"]),
     addItem() {
       if (this.newItem) {
-        this.$store.dispatch('todos/addItem', this.newItem);
+        const newItem = {
+          title: this.newItem,
+          status: 'pending',
+        };
+        this.$store.dispatch('todos/addItem', newItem);
         this.newItem = '';
       }
     }
+
   },
   mounted() {
     this.$refs.newItemInput.focus();
+    this.$store.dispatch('todos/fetchItems');
   },
   beforeUnmount() {
     clearInterval(this.interval);

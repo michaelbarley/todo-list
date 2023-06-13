@@ -19,7 +19,7 @@
 export default {
     props: {
         item: {
-            type: String,
+            type: Object,
             required: true
         },
         index: {
@@ -31,38 +31,42 @@ export default {
             default: null
         }
     },
+
     data() {
         return {
             isEditing: false,
+            localItem: { ...this.item },
         };
+    },
+    created() {
+        this.localItem = { ...this.item };
     },
     computed: {
         localStatus: {
             get() {
-                return this.item.status;
+                return this.localItem.status;
             },
             set(value) {
-                this.$store.dispatch('todos/updateItemStatus', { index: this.index, status: value });
-                this.saveItem();
+                this.localItem.status = value;
+                this.$store.dispatch('todos/updateItemStatus', this.localItem);
             }
         },
         editedItem: {
             get() {
-                return this.$store.state.todos.items[this.index].title;
+                return this.localItem.title;
             },
             set(value) {
-                this.$store.dispatch('todos/updateItem', { index: this.index, editedItem: value });
+                this.localItem.title = value;
             }
         }
     },
     methods: {
         changeStatus() {
-            this.$store.dispatch('todos/updateItemStatus', { index: this.index, status: this.localStatus });
+            this.$store.dispatch('todos/updateItemStatus', this.localItem);
         },
         handleClick() {
             if (!this.isEditing) {
                 this.isEditing = true;
-                this.editedItem = this.$store.state.todos.items[this.index].title;
             }
         },
 
@@ -71,19 +75,20 @@ export default {
                 this.saveItem();
             } else {
                 this.isEditing = true;
-                this.editedItem = this.$store.state.todos.items[this.index].title;
             }
         },
 
         removeItem() {
-            this.$store.dispatch('todos/removeItem', this.index);
+            this.$store.dispatch('todos/removeItem', this.localItem);
         },
         saveItem() {
             this.isEditing = false;
+            this.$store.dispatch('todos/saveItem', this.localItem);
         }
     }
 };
 </script>
+
     
 <style scoped>
 .todo-item {
@@ -131,7 +136,6 @@ export default {
     text-decoration: line-through;
 }
 
-
 .remove-button,
 .edit-button {
     padding: 8px;
@@ -159,4 +163,3 @@ export default {
     }
 }
 </style>
-  

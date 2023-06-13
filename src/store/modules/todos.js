@@ -1,3 +1,7 @@
+import axios from 'axios';
+
+axios.defaults.baseURL = 'http://todo-list-api.test';
+
 const state = {
   items: [],
   activeItem: null,
@@ -5,60 +9,43 @@ const state = {
 
 const mutations = {
   SET_ITEMS(state, items) {
-    state.items = items.map(item => ({ title: item, status: 'pending' }));
+    state.items = items;
   },
-  ADD_ITEM(state, newItem) {
-    state.items.push({ title: newItem, status: 'pending' });
-  },
-  REMOVE_ITEM(state, index) {
-    state.items.splice(index, 1);
-  },
-  UPDATE_ITEM(state, { index, editedItem }) {
-    state.items[index].title = editedItem;
-  },
-  UPDATE_ITEM_STATUS(state, { index, status }) {
-    state.items[index].status = status;
-  },
-  SET_ACTIVE_ITEM(state, index) {
-    state.activeItem = index;
+  SET_ACTIVE_ITEM(state, item) {
+    state.activeItem = item;
   },
 };
 
 const actions = {
-  fetchItems({ commit }) {
-    setTimeout(() => {
-      const items = ['Item 1', 'Item 2', 'Item 3'];
-      commit('SET_ITEMS', items);
-    }, 500);
+  async fetchItems({ commit }) {
+    const response = await axios.get('/api/items');
+    commit('SET_ITEMS', response.data.data);
   },
-  addItem({ commit, state }, newItem) {
-    setTimeout(() => {
-      commit('ADD_ITEM', newItem);
-      const index = state.items.length - 1;
-      commit('SET_ACTIVE_ITEM', index);
-    }, 500);
+  async addItem({ dispatch }, newItem) {
+    await axios.post('/api/items', newItem);
+    dispatch('fetchItems');
   },
-  removeItem({ commit, state }, index) {
-    setTimeout(() => {
-      commit('REMOVE_ITEM', index);
-      if (state.activeItem === index) {
-        commit('SET_ACTIVE_ITEM', null);
-      }
-    }, 500);
-  },
-  updateItem({ commit }, { index, editedItem }) {
-    commit('UPDATE_ITEM', { index, editedItem });
-  },
-  selectItem({ commit }, index) {
-    commit('SET_ACTIVE_ITEM', index);
-  },
-  saveItem({ commit }, { index, editedItem }) {
-    commit('UPDATE_ITEM', { index, editedItem });
+  async removeItem({ commit, dispatch }, item) {
+    await axios.delete(`/api/items/${item.id}`);
     commit('SET_ACTIVE_ITEM', null);
+    dispatch('fetchItems');
   },
-  updateItemStatus({ commit }, { index, status }) {
-    commit('UPDATE_ITEM_STATUS', { index, status });
+  async updateItem({ dispatch }, item) {
+    await axios.put(`/api/items/${item.id}`, item);
+    dispatch('fetchItems');
   },
+  selectItem({ commit }, item) {
+    commit('SET_ACTIVE_ITEM', item);
+  },
+  async saveItem({ dispatch }, item) {
+    await axios.put(`/api/items/${item.id}`, item);
+    dispatch('fetchItems');
+  },
+  async updateItemStatus({ dispatch }, item) {
+    await axios.put(`/api/items/${item.id}`, item);
+    dispatch('fetchItems');
+  },
+
 };
 
 const getters = {
@@ -69,7 +56,7 @@ const getters = {
     return state.activeItem;
   },
   getItemById: (state) => (id) => {
-    return state.items[id];
+    return state.items.find(item => item.id === id);
   },
 };
 
