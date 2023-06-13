@@ -35,30 +35,34 @@ export default {
     data() {
         return {
             isEditing: false,
+            localItem: { ...this.item },
         };
+    },
+    created() {
+        this.localItem = { ...this.item };
     },
     computed: {
         localStatus: {
             get() {
-                return this.item.status;
+                return this.localItem.status;
             },
             set(value) {
-                this.item.status = value;
-                this.$store.dispatch('todos/updateItemStatus', this.item);
+                this.localItem.status = value;
+                this.$store.dispatch('todos/updateItemStatus', this.localItem);
             }
         },
         editedItem: {
             get() {
-                return this.item.title;
+                return this.localItem.title;
             },
             set(value) {
-                this.item.title = value;
+                this.localItem.title = value;
             }
         }
     },
     methods: {
         changeStatus() {
-            this.$store.dispatch('todos/updateItemStatus', this.item);
+            this.$store.dispatch('todos/updateItemStatus', this.localItem);
         },
         handleClick() {
             if (!this.isEditing) {
@@ -75,15 +79,16 @@ export default {
         },
 
         removeItem() {
-            this.$store.dispatch('todos/removeItem', this.item);
+            this.$store.dispatch('todos/removeItem', this.localItem);
         },
         saveItem() {
             this.isEditing = false;
-            this.$store.dispatch('todos/saveItem', this.item);
+            this.$store.dispatch('todos/saveItem', this.localItem);
         }
     }
 };
 </script>
+
     
 <style scoped>
 .todo-item {

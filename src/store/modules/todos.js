@@ -29,7 +29,7 @@ const actions = {
     await axios.delete(`/api/items/${item.id}`);
     commit('SET_ACTIVE_ITEM', null);
     dispatch('fetchItems');
-},
+  },
   async updateItem({ dispatch }, item) {
     await axios.put(`/api/items/${item.id}`, item);
     dispatch('fetchItems');
@@ -40,12 +40,12 @@ const actions = {
   async saveItem({ dispatch }, item) {
     await axios.put(`/api/items/${item.id}`, item);
     dispatch('fetchItems');
-},
-  async updateItemStatus({ dispatch }, { item, status }) {
-    item.status = status;
+  },
+  async updateItemStatus({ dispatch }, item) {
     await axios.put(`/api/items/${item.id}`, item);
     dispatch('fetchItems');
   },
+
 };
 
 const getters = {
